@@ -9,6 +9,7 @@ class NetworkResponse {
   final bool isSuccess;
   final String errorMessage;
 
+
   NetworkResponse(
       {required this.isSuccess,
       required this.statusCode,
