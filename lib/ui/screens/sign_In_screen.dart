@@ -113,15 +113,20 @@ class _SignInScreenState extends State<SignInScreen> {
       "password": _passwordTEController.text,
 
     };
-    final NetworkResponse response = await NetworkCaller.postRequest(url: Urls.loginUrl, body: requestBody);
+    final NetworkResponse response =
+    await NetworkCaller.postRequest(url: Urls.loginUrl, body: requestBody);
 
     if (response.isSuccess){
       Navigator.pushReplacementNamed(context, MainBottomNavScreen.name);
-
     }else{
       _signInProgress= false;
       setState(() {});
-      showSnackBarMessage(context, response.errorMessage);
+      if(response.statusCode == 401){
+        showSnackBarMessage(context, "Wrong Email Or Password");
+      }
+      else {
+        showSnackBarMessage(context, response.errorMessage);
+      }
     }
 
     }

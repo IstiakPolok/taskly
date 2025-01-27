@@ -20,8 +20,8 @@ class TaskStatusSummaryCounterWidget extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16),
         child: Column(
           children: [
-            Text(count, style: textTheme.titleSmall),
-            Text(title, style: textTheme.titleLarge),
+            Text(count, style: textTheme.titleLarge),
+            Text(title, style: textTheme.titleSmall),
 
           ],
         ),
