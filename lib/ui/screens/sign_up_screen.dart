@@ -12,7 +12,7 @@ import 'package:taskly/ui/widgets/snack_bar_message.dart';
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
-  static const String name = '/sign-un';
+  static const String name = '/sign-up';
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -136,13 +136,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
       "lastName": _lastNameTEController.text.trim(),
       "mobile": _mobileTEController.text.trim(),
       "password": _passwordTEController.text,
-
     };
+
+    debugPrint('Request Parameters: $requestParams');
 
     final NetworkResponse response = await NetworkCaller.postRequest(
         url: Urls.registrationUrl, body: requestParams);
+
+    debugPrint('Response: ${response.responseData}');
+    debugPrint('Response Code: ${response.statusCode}');
+    debugPrint('Is Success: ${response.isSuccess}');
+    debugPrint('Error Message: ${response.errorMessage}');
+
     _signUpInProgress = false;
     setState(() {});
+
     if (response.isSuccess) {
       _clearTextFields();
       showSnackBarMessage(context, 'New User Registration Successful!');
@@ -150,6 +158,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       showSnackBarMessage(context, response.errorMessage);
     }
   }
+
 
   void _clearTextFields() {
     _firstNameTEController.clear();

@@ -1,10 +1,15 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:taskly/data/services/network_caller.dart';
 import 'package:taskly/ui/screens/forgot_password_verify_email_screen.dart';
 import 'package:taskly/ui/screens/main_bottom_nav_screen.dart';
 import 'package:taskly/ui/screens/sign_up_screen.dart';
 import 'package:taskly/ui/utils/app_colors.dart';
+import 'package:taskly/ui/widgets/center_circular_prograss_indicator.dart';
 import 'package:taskly/ui/widgets/screen_background.dart';
+import 'package:taskly/ui/widgets/snack_bar_message.dart';
+
+import '../../data/utils/urls.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -19,6 +24,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _emailTEController = TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _signInProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -40,19 +46,35 @@ class _SignInScreenState extends State<SignInScreen> {
                   controller: _emailTEController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(hintText: 'Email'),
+                  validator: (String? value) {
+                    if (value?.trim().isEmpty ?? true) {
+                      return 'Enter Your Email';
+                    }
+                    return null;
+                  },
+
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _passwordTEController,
                   obscureText: true,
                   decoration: const InputDecoration(hintText: 'Password'),
+                  validator: (String? value) {
+                    if (value?.trim().isEmpty ?? true) {
+                      return 'Enter Password';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 24),
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, MainBottomNavScreen.name);
-                    },
+              Visibility(
+                visible: _signInProgress == false,
+                replacement: const CenterCircularPrograssIndicator(),
+                child: ElevatedButton(
+                    onPressed: _onTapSignInButton,
                     child: const Icon(Icons.arrow_circle_right_outlined)),
+              ),
+
                 const SizedBox(height: 50),
                 Center(
                   child: Column(
@@ -75,6 +97,34 @@ class _SignInScreenState extends State<SignInScreen> {
       )),
     );
   }
+
+  void _onTapSignInButton() {
+    if (_formKey.currentState!.validate()) {
+      _signIn();
+    }
+  }
+
+  Future<void> _signIn() async {
+    _signInProgress = true;
+    setState(() {});
+    Map<String, dynamic> requestBody  = {
+
+      "email": _emailTEController.text.trim(),
+      "password": _passwordTEController.text,
+
+    };
+    final NetworkResponse response = await NetworkCaller.postRequest(url: Urls.loginUrl, body: requestBody);
+
+    if (response.isSuccess){
+      Navigator.pushReplacementNamed(context, MainBottomNavScreen.name);
+
+    }else{
+      _signInProgress= false;
+      setState(() {});
+      showSnackBarMessage(context, response.errorMessage);
+    }
+
+    }
 
   Widget _buildSignUpSelection() {
     return RichText(
