@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:taskly/data/models/task_model.dart';
 
 import '../utils/app_colors.dart';
 
 class TaskItemWidget extends StatelessWidget {
   const TaskItemWidget({
-    super.key,
+    super.key, required this.taskModel,
   });
+
+  final TaskModel taskModel;
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +17,12 @@ class TaskItemWidget extends StatelessWidget {
       elevation: 1,
       child: ListTile(
 
-        title: Text('Title Wii be here'),
+        title: Text(taskModel.title ?? ''),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Lorem Ipsum is simply dummy text"),
-            Text('date 12/12/25'),
+            Text(taskModel.description ?? ''),
+            Text('Date: ${taskModel.createdData ?? ''}'),
             const SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

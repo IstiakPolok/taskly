@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:taskly/data/services/network_caller.dart';
+import 'package:taskly/data/utils/urls.dart';
 import 'package:taskly/ui/utils/app_colors.dart';
+import 'package:taskly/ui/widgets/center_circular_prograss_indicator.dart';
 import 'package:taskly/ui/widgets/screen_background.dart';
+import 'package:taskly/ui/widgets/snack_bar_message.dart';
 import 'package:taskly/ui/widgets/tm_app_bar.dart';
 
 class AddNewTaskScreen extends StatefulWidget {
@@ -16,6 +20,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   final TextEditingController _titleEditingController = TextEditingController();
   final TextEditingController _descriptionEditingController = TextEditingController();
   final GlobalKey<FormState> _formKey =GlobalKey<FormState>();
+  bool _addNewtaskInPrograss = false; 
 
 
   @override
@@ -32,13 +37,19 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
               child: Column(
                  children: [
                    const SizedBox(height: 32),
-                   Text("Add New Tasl", style: textTheme.titleLarge),
+                   Text("Add New Task", style: textTheme.titleLarge),
                    const SizedBox(height: 16),
                    TextFormField(
                      controller: _titleEditingController,
                      decoration: const InputDecoration(
                        hintText: 'Title',
                      ),
+                     validator: (String? value){
+                       if(value?.trim().isEmpty ?? true){
+                         return "Enter Your Title Here";
+                       }
+                       return null;
+                     },
                    ),
                    const SizedBox(height: 8),
                    TextFormField(
@@ -47,9 +58,23 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                      decoration: const InputDecoration(
                        hintText: 'Description',
                      ),
+                     validator: (String? value){
+                       if(value?.trim().isEmpty ?? true){
+                         return "Enter Your Description Here";
+                       }
+                       return null;
+                     },
                    ),
                    const SizedBox(height: 16),
-                   ElevatedButton(onPressed: (){}, child: Icon(Icons.arrow_circle_right_outlined))
+                   Visibility(
+                     visible: _addNewtaskInPrograss == false,
+                     replacement: const CenterCircularPrograssIndicator(),
+                     child: ElevatedButton(onPressed: (){
+                       if (_formKey.currentState!.validate()){
+                         _createNewtask();
+                       }
+                     }, child: Icon(Icons.arrow_circle_right_outlined)),
+                   )
 
                  ],
               ),
@@ -59,6 +84,35 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
       ),
     );
   }
+  
+  Future<void> _createNewtask() async{
+    _addNewtaskInPrograss = true;
+    setState(() {});
+    Map<String, dynamic> requestBody ={
+      "title":_titleEditingController.text.trim(),
+      "description":_descriptionEditingController.text.trim(),
+      "status":"New"
+    };
+    final NetworkResponse response = await NetworkCaller.postRequest
+      (url: Urls.createTaskUrl, body: requestBody);
+    _addNewtaskInPrograss = false;
+    setState(() {});
+    if(response.isSuccess){
+      _clearTextField();
+      showSnackBarMessage(context, "New Task Added");
+
+    }
+    else{
+      showSnackBarMessage(context, response.errorMessage);
+    }
+  }
+
+  void _clearTextField(){
+    _titleEditingController.clear();
+    _descriptionEditingController.clear();
+  }
+  
+  
   @override
   void dispose() {
     _titleEditingController.dispose();
